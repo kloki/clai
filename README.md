@@ -1,4 +1,6 @@
-# clai
+# CLAI
+
+![Example](./example.png)
 
 Clai is cli version of "chatGPT". It requires a OpenAI api key. These can be found [here](https://beta.openai.com/account/api-keys)
 
