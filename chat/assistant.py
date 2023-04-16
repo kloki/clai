@@ -1,3 +1,5 @@
+import subprocess
+
 from rich.table import Table
 
 ASSISTANTS = {}
@@ -26,10 +28,38 @@ ASSISTANTS["default"] = Assistant(
     "You are a helpful assistant who communicates directly and succintly. Use markdown for formatting",
 )
 
+
 ASSISTANTS["unhelpful"] = Assistant(
     "🤪",
     "The unhelpfull assistant",
     "You are a unhelpful assistant who adds mostly unrelated information",
+)
+
+
+def run_bash(command):
+    return (
+        subprocess.Popen(command.split(" "), stdout=subprocess.PIPE)
+        .stdout.read()
+        .decode("utf-8")
+    )
+
+
+def git_prompt():
+    git_status = run_bash("git status")
+    git_diff = run_bash("git diff")
+    files = run_bash("ls").split("\n")
+    readme = ""
+    for file in files:
+        if "readme" in file.lower():
+            readme = run_bash(f"cat {file}")
+            break
+    return f"You're are the assisent of a developer for a specific repository. This is the Readme:{readme}. This is the output of git status: {git_status}, This is the current git diff: {git_diff}"
+
+
+ASSISTANTS["git"] = Assistant(
+    "👷",
+    "The git assistant",
+    git_prompt,
 )
 
 
