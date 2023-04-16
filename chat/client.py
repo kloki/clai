@@ -3,6 +3,7 @@ import uuid
 
 import openai
 from prompt_toolkit import PromptSession
+from prompt_toolkit.completion import PathCompleter, WordCompleter, merge_completers
 from rich.console import Console
 from rich.live import Live
 from rich.markdown import Markdown
@@ -19,8 +20,24 @@ class Client:
         self.assistant = assistant if assistant else ASSISTANTS["default"]
         self.session = Session(self.assistant)
         self.console = Console()
-        self.prompt = PromptSession()
         self.language_model = "gpt-3.5-turbo"
+
+        self.commands = {
+            "\quit": self.exit,
+            "\q": self.exit,
+            "\exit": self.exit,
+            "\dump": self.dump,
+            "\switch": self.switch,
+            "\clear": self.clear,
+            "\load": self.load,
+            "\help": self.help,
+        }
+
+        self.prompt = PromptSession(
+            completer=merge_completers(
+                [PathCompleter(), WordCompleter(self.commands.keys(), sentence=True)]
+            )
+        )
 
     def system_message(self, message):
         self.console.print(f"[cyan]💡 {message}")
@@ -37,41 +54,6 @@ class Client:
             Spinner("dots12", style="green"), refresh_per_second=20, transient=True
         ):
             self.query_model(question)
-
-    def clear_session(self):
-        self.session = Session(self.assistant)
-
-    def system_command(self, question):
-        if not question.startswith("/"):
-            return False
-        question = question[1:].lower()
-
-        if question in ["quit", "bye", "exit", "q"]:
-            self.system_message("Exiting...")
-            exit()
-        elif "clear" in question:
-            self.system_message("Clearing session.")
-            self.clear_session()
-
-        elif "dump" in question:
-            guid = str(uuid.uuid4())
-            self.system_message(f"Dumping session to {guid}.json")
-            self.dump_session(guid)
-
-        elif "switch" in question:
-            self.system_message("Choose assistent")
-            self.console.print(Padding(assistants_table(), (0, 4)))
-            assistant_id = Prompt.ask(
-                choices=ASSISTANTS.keys(),
-                default="default",
-            )
-            self.system_message(f"Switching to {assistant_id}")
-            self.assistant = ASSISTANTS[assistant_id]
-            self.clear_session()
-
-        else:
-            self.system_message("Unkown command.")
-        return True
 
     def start(self):
         self.system_message(f"Chat started assistant: {self.assistant.banner()}")
@@ -94,3 +76,72 @@ class Client:
             model=self.language_model, messages=self.session.payload()
         )
         self.session.answer(response["choices"][0]["message"]["content"])
+
+    # Chat commands
+    def exit(self, question):
+        self.system_message("Exiting....")
+        exit()
+
+    def help(self, question):
+        self.system_message(
+            "Possible commands \n  - " + "\n  - ".join(self.commands.keys())
+        )
+
+    def clear(self, question):
+        self.system_message("Clearing session.")
+        self.clear_session()
+
+    def dump(self, question):
+        guid = str(uuid.uuid4())
+        self.system_message(f"Dumping session to {guid}.json")
+        self.dump_session(guid)
+
+    def load(self, question):
+        content = ""
+        file = ""
+        try:
+            file = question.split(" ")[1]
+            with open(file, "r") as infile:
+                content = infile.read()
+        except (IndexError, IsADirectoryError, FileNotFoundError):
+            self.system_message("Invalid File")
+            return
+        if not content:
+            self.system_message("Invalid File")
+            return
+        self.session.question(
+            f"This it the content of the file `{file}`: ```{content}```"
+        )
+        self.system_message(f"Added {file} to context of assistant.")
+
+    def clear_session(self):
+        self.session = Session(self.assistant)
+
+    def switch(self, question):
+        items = question.split(" ")
+        if len(items) > 1 and items[1] in ASSISTANTS.keys():
+            assistant_id = items[1]
+        else:
+            self.system_message("Choose assistent")
+            self.console.print(Padding(assistants_table(), (0, 4)))
+            assistant_id = Prompt.ask(
+                choices=ASSISTANTS.keys(),
+                default="default",
+            )
+        self.system_message(f"Switching to {assistant_id}")
+        self.assistant = ASSISTANTS[assistant_id]
+        self.clear_session()
+
+    def system_command(self, question):
+        if question[0] not in ["\\", "/", "."]:
+            return False
+
+        if question[0] in ["/", "."]:
+            question = "\load " + question
+        command = question.split(" ")[0]
+
+        if command not in self.commands:
+            self.system_message("Unknow command!")
+            return True
+        self.commands[command](question)
+        return True
