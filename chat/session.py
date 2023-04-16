@@ -1,7 +1,7 @@
 class Session:
     def __init__(self, role):
         self.role = role
-        self.messages = [role.prompt()]
+        self.messages = role.introduction()
 
     def question(self, question):
         self.messages.append({"role": "user", "content": question})

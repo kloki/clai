@@ -6,17 +6,15 @@ ASSISTANTS = {}
 
 
 class Assistant:
-    def __init__(self, icon, help, prompt):
+    def __init__(self, icon, help, context):
         self.icon = icon
-        self._prompt = prompt
+        self.context = context
         self.help = help
 
-    def prompt(self):
-        if callable(self._prompt):
-            content = self._prompt()
-        else:
-            content = self._prompt
-        return {"role": "system", "content": content}
+    def introduction(self):
+        if callable(self.context):
+            return self.context()
+        return [{"role": "system", "content": self.context}]
 
     def banner(self):
         return f"{self.icon} {self.help}"
@@ -51,9 +49,31 @@ def git_prompt():
     readme = ""
     for file in files:
         if "readme" in file.lower():
-            readme = run_bash(f"cat {file}")
+            with open(file, "r") as infile:
+                readme = infile.read()
             break
-    return f"You're are the assisent of a developer for a specific repository. This is the Readme:{readme}. This is the output of git status: {git_status}, This is the current git diff: {git_diff}"
+
+    messages = [
+        {
+            "role": "system",
+            "content": "You're are the assisent of a developer for a specific repository.",
+        }
+    ]
+    if readme:
+        messages.append(
+            {"role": "user", "content": f"This is the readme:```{readme}```"}
+        )
+
+    messages.append(
+        {
+            "role": "user",
+            "content": f"This is the ouput of `git status`:```{git_status}```",
+        }
+    )
+    messages.append(
+        {"role": "user", "content": f"This is the ouput of `git diff`:```{git_diff}```"}
+    )
+    return messages
 
 
 ASSISTANTS["git"] = Assistant(
