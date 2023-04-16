@@ -53,7 +53,9 @@ def git_prompt():
         if "readme" in file.lower():
             readme = run_bash(f"cat {file}")
             break
-    return f"You're are the assisent of a developer for a specific repository. This is the Readme:{readme}. This is the output of git status: {git_status}, This is the current git diff: {git_diff}"
+    return f"You're are the assisent of a developer for a specific repository. This is the Readme:{readme}. This is the output of git status: {git_status}, This is the current git diff: {git_diff}"[
+        :4000
+    ]
 
 
 ASSISTANTS["git"] = Assistant(
