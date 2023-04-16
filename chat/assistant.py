@@ -1,36 +1,40 @@
 from rich.table import Table
 
-ROLES = {}
+ASSISTANTS = {}
 
 
-class Role:
+class Assistant:
     def __init__(self, icon, help, prompt):
         self.icon = icon
         self._prompt = prompt
         self.help = help
 
     def prompt(self):
-        return {"role": "system", "content": self._prompt}
+        if callable(self._prompt):
+            content = self._prompt()
+        else:
+            content = self._prompt
+        return {"role": "system", "content": content}
 
     def banner(self):
         return f"{self.icon} {self.help}"
 
 
-ROLES["default"] = Role(
+ASSISTANTS["default"] = Assistant(
     "🤖",
     "The vanilla assistant",
     "You are a helpful assistant who communicates directly and succintly. Use markdown for formatting",
 )
 
-ROLES["unhelpful"] = Role(
+ASSISTANTS["unhelpful"] = Assistant(
     "🤪",
     "The unhelpfull assistant",
     "You are a unhelpful assistant who adds mostly unrelated information",
 )
 
 
-def roles_table():
+def assistants_table():
     table = Table("id", "icon", "description")
-    for k, v in ROLES.items():
+    for k, v in ASSISTANTS.items():
         table.add_row(k, v.icon, v.help)
     return table

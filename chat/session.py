@@ -22,4 +22,4 @@ class Session:
             total_sum += len(m["content"])
             total = total_sum
 
-        return (total / 4000) * 0.02
+        return round(((total / 4000) * 0.2), 3)

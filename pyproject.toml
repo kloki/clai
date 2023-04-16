@@ -9,6 +9,8 @@ readme = "README.md"
 python = "^3.10"
 openai = "^0.27.4"
 rich = "^13.3.4"
+prompt-toolkit = "^3.0.38"
+typer = "^0.7.0"
 
 
 [build-system]
