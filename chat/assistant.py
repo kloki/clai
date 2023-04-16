@@ -11,10 +11,12 @@ class Assistant:
         self.context = context
         self.help = help
 
-    def introduction(self):
+    def instructions(self):
         if callable(self.context):
             return self.context()
-        return [{"role": "system", "content": self.context}]
+        messages = [{"role": "user", "content": c} for c in self.context]
+        messages[0]["role"] = "system"
+        return messages
 
     def banner(self):
         return f"{self.icon} {self.help}"
@@ -23,14 +25,32 @@ class Assistant:
 ASSISTANTS["default"] = Assistant(
     "🤖",
     "The vanilla assistant",
-    "You are a helpful assistant who communicates directly and succintly. Use markdown for formatting",
+    [
+        "You are a helpful assistant who communicates directly and succintly."
+        "Use markdown for formatting."
+    ],
 )
 
 
 ASSISTANTS["unhelpful"] = Assistant(
     "🤪",
     "The unhelpfull assistant",
-    "You are a unhelpful assistant who adds mostly unrelated information",
+    [
+        "You are a unhelpful assistant who adds mostly unrelated information",
+        "Avoid punctuation.",
+    ],
+)
+
+ASSISTANTS["cook"] = Assistant(
+    "🍛",
+    "The (vegetarian) cooking assistant",
+    [
+        "You are a helpful assistant who provides recipes and suggestions for cooking.",
+        "Only suggest vegetarian recipes.",
+        "Use markdown for formatting.",
+        "Use metric weight measurements.",
+        "Don't use volumetric measurements.",
+    ],
 )
 
 
@@ -61,17 +81,20 @@ def git_prompt():
     ]
     if readme:
         messages.append(
-            {"role": "user", "content": f"This is the readme:```{readme}```"}
+            {"role": "user", "content": f"This is the readme:\n```{readme}```"}
         )
 
     messages.append(
         {
             "role": "user",
-            "content": f"This is the ouput of `git status`:```{git_status}```",
+            "content": f"This is the ouput of `git status`:\n```{git_status}```",
         }
     )
     messages.append(
-        {"role": "user", "content": f"This is the ouput of `git diff`:```{git_diff}```"}
+        {
+            "role": "user",
+            "content": f"This is the ouput of `git diff`:\n```{git_diff}```",
+        }
     )
     return messages
 

@@ -21,6 +21,7 @@ class Client:
         self.session = Session(self.assistant)
         self.console = Console()
         self.language_model = "gpt-3.5-turbo"
+        self.inserted_files = []
 
         self.commands = {
             "\quit": self.exit,
@@ -31,6 +32,7 @@ class Client:
             "\clear": self.clear,
             "\load": self.load,
             "\help": self.help,
+            "\\assistant_instructions": self.instructions,
         }
 
         self.prompt = PromptSession(
@@ -39,8 +41,10 @@ class Client:
             )
         )
 
-    def system_message(self, message):
+    def system_message(self, message, data=None):
         self.console.print(f"[cyan]💡 {message}")
+        if data:
+            self.console.print(Padding(Markdown(data), (0, 4)))
 
     def ask_user(self):
         return self.prompt.prompt(">>> ")
@@ -84,12 +88,21 @@ class Client:
 
     def help(self, question):
         self.system_message(
-            "Possible commands \n  - " + "\n  - ".join(self.commands.keys())
+            "Possible commands:", data="  - " + "\n  - ".join(self.commands.keys())
         )
+
+    def instructions(self, question):
+        data = "\n".join([f"- {m['content']}" for m in self.assistant.instructions()])
+        self.system_message("Assistant instructions:", data=data)
+        if self.inserted_files:
+            data = "\n".join([f"- {f}" for f in self.inserted_files])
+
+            self.system_message("Loaded Files:", data=data)
 
     def clear(self, question):
         self.system_message("Clearing session.")
         self.clear_session()
+        self.inserted_files = []
 
     def dump(self, question):
         guid = str(uuid.uuid4())
@@ -109,9 +122,9 @@ class Client:
         if not content:
             self.system_message("Invalid File")
             return
-        self.session.question(
-            f"This it the content of the file `{file}`: ```{content}```"
-        )
+        payload = f"This it the content of the file `{file}`:\n ```{content}```"
+        self.session.question(payload)
+        self.inserted_files.append(payload)
         self.system_message(f"Added {file} to context of assistant.")
 
     def clear_session(self):
