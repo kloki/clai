@@ -20,6 +20,7 @@ class Session:
         total_sum = 0
         for m in self.messages:
             total_sum += len(m["content"])
-            total = total_sum
+            if m["role"] == "user":
+                total += total_sum
 
-        return round(((total / 4000) * 0.2), 3)
+        return round(((total / 4000) * 0.002), 3)

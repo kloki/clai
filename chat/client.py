@@ -46,7 +46,7 @@ class Client:
             return False
         question = question[1:].lower()
 
-        if question in ["quit", "bye", "exit"]:
+        if question in ["quit", "bye", "exit", "q"]:
             self.system_message("Exiting...")
             exit()
         elif "clear" in question:
@@ -59,8 +59,8 @@ class Client:
             self.dump_session(guid)
 
         elif "switch" in question:
-            self.system_message("Choose assissent")
-            self.console.print(assistants_table())
+            self.system_message("Choose assistent")
+            self.console.print(Padding(assistants_table(), (0, 4)))
             assistant_id = Prompt.ask(
                 choices=ASSISTANTS.keys(),
                 default="default",
@@ -86,6 +86,7 @@ class Client:
             f"\n<<< {self.assistant.icon} [green] \[~${self.session.money_spend()}]"
         )
         self.console.print(Padding(Markdown(self.session.new_message()), (0, 4)))
+        self.console.print("")
 
     def query_model(self, question):
         self.session.question(question)

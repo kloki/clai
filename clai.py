@@ -1,6 +1,6 @@
+#!/usr/bin/env python3
 import enum
 import os
-import subprocess
 
 import typer
 from rich import print
@@ -30,4 +30,5 @@ def assistants():
 if __name__ == "__main__":
     if not os.getenv("OPENAI_API_KEY", "").startswith("sk-"):
         print("OPENAI_API_KEY not set!")
+        exit()
     app()
