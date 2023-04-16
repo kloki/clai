@@ -14,3 +14,12 @@ class Session:
 
     def new_message(self):
         return self.messages[-1]["content"]
+
+    def money_spend(self):
+        total = 0
+        total_sum = 0
+        for m in self.messages:
+            total_sum += len(m["content"])
+            total = total_sum
+
+        return (total / 4000) * 0.02
