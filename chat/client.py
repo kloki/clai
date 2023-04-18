@@ -12,6 +12,7 @@ from rich.prompt import Prompt
 from rich.spinner import Spinner
 
 from .assistant import ASSISTANTS, assistants_table
+from .language_model import ChatGPT3
 from .session import Session
 
 
@@ -20,7 +21,7 @@ class Client:
         self.assistant = assistant if assistant else ASSISTANTS["default"]
         self.session = Session(self.assistant)
         self.console = Console()
-        self.language_model = "gpt-3.5-turbo"
+        self.model = ChatGPT3()
         self.inserted_files = []
 
         self.commands = {
@@ -60,7 +61,9 @@ class Client:
             self.query_model(question)
 
     def start(self):
-        self.system_message(f"Chat started assistant: {self.assistant.banner()}")
+        self.system_message(
+            f"Chat started assistant: {self.assistant.banner()} [green]🧠 {self.model.name}"
+        )
         while True:
             question = self.ask_user()
             if not self.system_command(question):
@@ -69,7 +72,7 @@ class Client:
 
     def print_answer(self):
         self.console.print(
-            f"\n<<< {self.assistant.icon} [green] \[~${self.session.money_spend()}]"
+            f"\n<<< {self.assistant.icon} [green] \[~${self.model.money_spend(self.session.tokens_spend())}]"
         )
         self.console.print(Padding(Markdown(self.session.new_message()), (0, 4)))
         self.console.print("")
@@ -77,7 +80,7 @@ class Client:
     def query_model(self, question):
         self.session.question(question)
         response = openai.ChatCompletion.create(
-            model=self.language_model, messages=self.session.payload()
+            model=self.model.name, messages=self.session.payload()
         )
         self.session.answer(response["choices"][0]["message"]["content"])
 
