@@ -2,6 +2,7 @@ import json
 import uuid
 
 import openai
+import pyperclip
 from prompt_toolkit import PromptSession
 from prompt_toolkit.completion import PathCompleter, WordCompleter, merge_completers
 from rich.console import Console
@@ -10,6 +11,7 @@ from rich.markdown import Markdown
 from rich.padding import Padding
 from rich.prompt import Prompt
 from rich.spinner import Spinner
+from rich.table import Table
 
 from .assistant import ASSISTANTS, assistants_table
 from .language_model import ChatGPT3
@@ -33,9 +35,29 @@ class Client:
             "\clear": self.clear,
             "\load": self.load,
             "\help": self.help,
+            "\clip": self.copy_to_clipboard,
             "\\assistant_instructions": self.instructions,
         }
 
+        self.commands = {
+            "\q": (self.exit, "Exit the program"),
+            "\c": (
+                self.copy_to_clipboard,
+                "Copy the last response to the clipboard",
+            ),
+            "\dump": (self.dump, "Dump the current chat thread to a file"),
+            "\switch": (self.switch, "Switch to a different assistatn"),
+            "\clear": (self.clear, "Clear the current chat thread"),
+            "\load": (
+                self.load,
+                "Load a file and add it to the context of the assistant",
+            ),
+            "\help": (self.help, "Display this help message"),
+            "\\assistant_instructions": (
+                self.instructions,
+                "List the instruction of the current assistant",
+            ),
+        }
         self.prompt = PromptSession(
             completer=merge_completers(
                 [PathCompleter(), WordCompleter(self.commands.keys(), sentence=True)]
@@ -90,9 +112,11 @@ class Client:
         exit()
 
     def help(self, question):
-        self.system_message(
-            "Possible commands:", data="  - " + "\n  - ".join(self.commands.keys())
-        )
+        table = Table("command", "description")
+        for k, v in self.commands.items():
+            table.add_row(k, v[1])
+        self.system_message("System commands")
+        self.console.print(Padding(table, (0, 4)))
 
     def instructions(self, question):
         data = "\n".join([f"- {m['content']}" for m in self.assistant.instructions()])
@@ -148,6 +172,16 @@ class Client:
         self.assistant = ASSISTANTS[assistant_id]
         self.clear_session()
 
+    def copy_to_clipboard(self, question):
+        content = self.session.messages[-1]["content"]
+        if "```" in content:
+            content = content.split("```")[1]
+            self.system_message("Copied text block in last response to clipboard")
+        else:
+            self.system_message("Copied last response to clipboard")
+
+        pyperclip.copy(content)
+
     def system_command(self, question):
         if question[0] not in ["\\", "/", "."]:
             return False
@@ -158,6 +192,6 @@ class Client:
 
         if command not in self.commands:
             self.system_message("Unknow command!")
-            return True
-        self.commands[command](question)
+            command = "\help"
+        self.commands[command][0](question)
         return True
