@@ -51,7 +51,18 @@ ASSISTANTS["cook"] = Assistant(
         "Only suggest vegetarian recipes.",
         "Use markdown for formatting.",
         "Use metric weight measurements.",
-        "Don't use volumetric measurements.",
+        "Don't use volumetric measurements because they are inaccurate",
+    ],
+)
+
+
+ASSISTANTS["test_data"] = Assistant(
+    "🧪 ",
+    "The dummy test data assistant",
+    [
+        "You are a helpful assistant who dummy data for a developer or tester",
+        "Please provide data in json that is formatted to be readable. Keys should be in snake_case",
+        "Always give 3 or more examples.",
     ],
 )
 

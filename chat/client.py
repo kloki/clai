@@ -62,7 +62,7 @@ class Client:
 
     def start(self):
         self.system_message(
-            f"Chat started assistant: {self.assistant.banner()} [green]🧠 {self.model.name}"
+            f"Chat: {self.assistant.banner()} [green]🧠 {self.model.name}"
         )
         while True:
             question = self.ask_user()
