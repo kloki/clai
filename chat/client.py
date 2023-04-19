@@ -14,17 +14,18 @@ from rich.spinner import Spinner
 from rich.table import Table
 
 from .assistant import ASSISTANTS, assistants_table
-from .language_model import ChatGPT3
+from .language_model import GPT3
 from .session import Session
 
 
 class Client:
-    def __init__(self, assistant=None):
+    def __init__(self, assistant=None, model=GPT3()):
         self.assistant = assistant if assistant else ASSISTANTS["default"]
         self.session = Session(self.assistant)
         self.console = Console()
-        self.model = ChatGPT3()
+        self.model = model
         self.inserted_files = []
+        self.tokens = 0
 
         self.commands = {
             "\quit": self.exit,
@@ -94,7 +95,7 @@ class Client:
 
     def print_answer(self):
         self.console.print(
-            f"\n<<< {self.assistant.icon} [green] \[~${self.model.money_spend(self.session.tokens_spend())}]"
+            f"\n<<< {self.assistant.icon} [green] \[${self.model.money_spend(self.tokens)}]"
         )
         self.console.print(Padding(Markdown(self.session.new_message()), (0, 4)))
         self.console.print("")
@@ -102,9 +103,10 @@ class Client:
     def query_model(self, question):
         self.session.question(question)
         response = openai.ChatCompletion.create(
-            model=self.model.name, messages=self.session.payload()
+            messages=self.session.payload(), **self.model.settings()
         )
         self.session.answer(response["choices"][0]["message"]["content"])
+        self.tokens += response["usage"]["total_tokens"]
 
     # Chat commands
     def exit(self, question):
@@ -130,6 +132,7 @@ class Client:
         self.system_message("Clearing session.")
         self.clear_session()
         self.inserted_files = []
+        self.tokens = 0
 
     def dump(self, question):
         guid = str(uuid.uuid4())
