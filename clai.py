@@ -19,8 +19,8 @@ def chat_command(
     assistant: assistants_enum = typer.Argument(
         default="default", help="Assistant profile to be used."
     ),
-    temperature: int = typer.Option(default=1, help="Temperature used by model"),
-    top_p: int = typer.Option(default=1, help="Top_p used by model"),
+    temperature: float = typer.Option(default=1, help="Temperature used by model"),
+    top_p: float = typer.Option(default=1, help="Top_p used by model"),
 ):
     Chat(ASSISTANTS[assistant.value], GPT3(temperature, top_p)).start()
 
