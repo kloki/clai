@@ -89,7 +89,7 @@ class Client:
         )
         while True:
             question = self.ask_user()
-            if not self.system_command(question):
+            if question and not self.system_command(question):
                 self.ask_assistent(question)
                 self.print_answer()
 
