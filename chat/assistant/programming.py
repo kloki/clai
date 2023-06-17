@@ -46,18 +46,18 @@ def git_prompt():
     ]
     if readme:
         messages.append(
-            {"role": "user", "content": f"This is the readme:\n```{readme}```"}
+            {"role": "system", "content": f"This is the readme:\n```{readme}```"}
         )
 
     messages.append(
         {
-            "role": "user",
+            "role": "system",
             "content": f"This is the ouput of `git status`:\n```{git_status}```",
         }
     )
     messages.append(
         {
-            "role": "user",
+            "role": "system",
             "content": f"This is the ouput of `git diff`:\n```{git_diff}```",
         }
     )
@@ -69,7 +69,6 @@ ASSISTANTS["git"] = Assistant(
     "The git assistant",
     git_prompt,
 )
-
 
 ASSISTANTS["bash"] = Assistant(
     "🖥️ ",

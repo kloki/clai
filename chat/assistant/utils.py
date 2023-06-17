@@ -1,9 +1,9 @@
 import subprocess
 
 
-def run_bash(command):
+def run_bash(command, split=True):
+    if split:
+        command = command.split(" ")
     return (
-        subprocess.Popen(command.split(" "), stdout=subprocess.PIPE)
-        .stdout.read()
-        .decode("utf-8")
+        subprocess.Popen(command, stdout=subprocess.PIPE).stdout.read().decode("utf-8")
     )

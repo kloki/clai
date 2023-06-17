@@ -1,2 +1,2 @@
-from . import programming, simple
+from . import postgres, programming, simple
 from .base import ASSISTANTS, assistants_table

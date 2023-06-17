@@ -1,6 +1,6 @@
 class GPT3:
-    name = "gpt-3.5-turbo"
-    price_per_token = 0.000002
+    name = "gpt-3.5-turbo-16k-0613"
+    price_per_token = 0.0000015
 
     def __init__(self, temperature=1, top_p=1):
         self.temperature = temperature
