@@ -7,7 +7,7 @@ from rich import print
 
 from chat import Chat
 from chat.assistant import ASSISTANTS, assistants_table
-from chat.language_model import GPT3
+from chat.language_model import LanguageModel, get_model
 
 app = typer.Typer(help="Cli to interact with OpenAI chat models")
 
@@ -21,8 +21,11 @@ def chat_command(
     ),
     temperature: float = typer.Option(default=1, help="Temperature used by model"),
     top_p: float = typer.Option(default=1, help="Top_p used by model"),
+    lm: LanguageModel = typer.Option(
+        default=LanguageModel.GPT3, help="gpt_version to be"
+    ),
 ):
-    Chat(ASSISTANTS[assistant.value], GPT3(temperature, top_p)).start()
+    Chat(ASSISTANTS[assistant.value], get_model(lm)(temperature, top_p)).start()
 
 
 @app.command(name="assistants", help="List all available assisent profiles")
