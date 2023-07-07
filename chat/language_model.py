@@ -27,7 +27,7 @@ class GPT3:
 
 class GPT4:
     name = "gpt-4"
-    price_per_token = 0.00006
+    price_per_token = 0.000006
 
     def __init__(self, temperature=1, top_p=1):
         self.temperature = temperature
