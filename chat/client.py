@@ -1,8 +1,8 @@
 import json
 import uuid
 
-import openai
 import pyperclip
+from openai import OpenAI
 from prompt_toolkit import PromptSession
 from prompt_toolkit.completion import PathCompleter, WordCompleter, merge_completers
 from rich.console import Console
@@ -26,6 +26,7 @@ class Client:
         self.model = model
         self.inserted_files = []
         self.tokens = 0
+        self.ai_client = OpenAI()
 
         self.commands = {
             "\quit": self.exit,
@@ -102,11 +103,11 @@ class Client:
 
     def query_model(self, question):
         self.session.question(question)
-        response = openai.ChatCompletion.create(
+        response = self.ai_client.chat.completions.create(
             messages=self.session.payload(), **self.model.settings()
         )
-        self.session.answer(response["choices"][0]["message"]["content"])
-        self.tokens += response["usage"]["total_tokens"]
+        self.session.answer(response.choices[0].message.content)
+        self.tokens += response.usage.total_tokens
 
     # Chat commands
     def exit(self, question):
