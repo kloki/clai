@@ -1,5 +1,6 @@
 import json
 import uuid
+import webbrowser
 
 import pyperclip
 from openai import OpenAI
@@ -29,20 +30,9 @@ class Client:
         self.ai_client = OpenAI()
 
         self.commands = {
-            "\quit": self.exit,
-            "\q": self.exit,
-            "\exit": self.exit,
-            "\dump": self.dump,
-            "\switch": self.switch,
-            "\clear": self.clear,
-            "\load": self.load,
-            "\help": self.help,
-            "\clip": self.copy_to_clipboard,
-            "\\assistant_instructions": self.instructions,
-        }
-
-        self.commands = {
             "\q": (self.exit, "Exit the program"),
+            "\exit": (self.exit, "Exit the program"),
+            "\quit": (self.exit, "Exit the program"),
             "\c": (
                 self.copy_to_clipboard,
                 "Copy the last response to the clipboard",
@@ -50,6 +40,8 @@ class Client:
             "\dump": (self.dump, "Dump the current chat thread to a file"),
             "\switch": (self.switch, "Switch to a different assistatn"),
             "\clear": (self.clear, "Clear the current chat thread"),
+            "\i": (self.generate_image, "Generate an image"),
+            "\image": (self.generate_image, "Generate an image"),
             "\load": (
                 self.load,
                 "Load a file and add it to the context of the assistant",
@@ -70,6 +62,17 @@ class Client:
         self.console.print(f"[cyan]💡 {message}")
         if data:
             self.console.print(Padding(Markdown(data), (0, 4)))
+
+    def generate_image(self, prompt):
+        with Live(
+            Spinner("dots12", style="green"), refresh_per_second=20, transient=True
+        ):
+            response = self.ai_client.images.generate(
+                model="dall-e-3", prompt=prompt, n=1, size="1024x1024"
+            )
+        webbrowser.open(response.data[0].url, new=0, autoraise=True)
+        message = f"I generated the image!\n\n{response.data[0].url}\n\n Revised prompt: \n\n```{response.data[0].revised_prompt}```"
+        self.print_answer(message)
 
     def ask_user(self):
         return self.prompt.prompt(">>> ")
@@ -94,11 +97,13 @@ class Client:
                 self.ask_assistent(question)
                 self.print_answer()
 
-    def print_answer(self):
+    def print_answer(self, message=None):
+        if message is None:
+            message = self.session.new_message()
         self.console.print(
             f"\n<<< {self.assistant.icon} [green] \[${self.model.money_spend(self.tokens)}]"
         )
-        self.console.print(Padding(Markdown(self.session.new_message()), (0, 4)))
+        self.console.print(Padding(Markdown(message), (0, 4)))
         self.console.print("")
 
     def query_model(self, question):
