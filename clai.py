@@ -22,7 +22,7 @@ def chat_command(
     temperature: float = typer.Option(default=1, help="Temperature used by model"),
     top_p: float = typer.Option(default=1, help="Top_p used by model"),
     lm: LanguageModel = typer.Option(
-        default=LanguageModel.GPT3, help="gpt_version to be"
+        default=LanguageModel.GPT4, help="gpt_version to be"
     ),
 ):
     Chat(ASSISTANTS[assistant.value], get_model(lm)(temperature, top_p)).start()
