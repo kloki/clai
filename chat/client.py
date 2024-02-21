@@ -1,9 +1,7 @@
 import json
 import uuid
-import webbrowser
 
 import pyperclip
-from openai import OpenAI
 from prompt_toolkit import PromptSession
 from prompt_toolkit.completion import PathCompleter, WordCompleter, merge_completers
 from rich.console import Console
@@ -15,19 +13,17 @@ from rich.spinner import Spinner
 from rich.table import Table
 
 from .assistant import ASSISTANTS, assistants_table
-from .language_model import GPT3
+from .language_model import GPT
 from .session import Session
 
 
 class Client:
-    def __init__(self, assistant=None, model=GPT3()):
+    def __init__(self, assistant=None, model=GPT):
         self.assistant = assistant if assistant else ASSISTANTS["default"]
         self.session = Session(self.assistant)
         self.console = Console()
         self.model = model
         self.inserted_files = []
-        self.tokens = 0
-        self.ai_client = OpenAI()
 
         self.commands = {
             "\q": (self.exit, "Exit the program"),
@@ -40,8 +36,6 @@ class Client:
             "\dump": (self.dump, "Dump the current chat thread to a file"),
             "\switch": (self.switch, "Switch to a different assistatn"),
             "\clear": (self.clear, "Clear the current chat thread"),
-            "\i": (self.generate_image, "Generate an image"),
-            "\image": (self.generate_image, "Generate an image"),
             "\load": (
                 self.load,
                 "Load a file and add it to the context of the assistant",
@@ -62,17 +56,6 @@ class Client:
         self.console.print(f"[cyan]💡 {message}")
         if data:
             self.console.print(Padding(Markdown(data), (0, 4)))
-
-    def generate_image(self, prompt):
-        with Live(
-            Spinner("dots12", style="green"), refresh_per_second=20, transient=True
-        ):
-            response = self.ai_client.images.generate(
-                model="dall-e-3", prompt=prompt, n=1, size="1024x1024"
-            )
-        webbrowser.open(response.data[0].url, new=0, autoraise=True)
-        message = f"I generated the image!\n\n{response.data[0].url}\n\n Revised prompt: \n\n```{response.data[0].revised_prompt}```"
-        self.print_answer(message)
 
     def ask_user(self):
         return self.prompt.prompt(">>> ")
@@ -100,19 +83,14 @@ class Client:
     def print_answer(self, message=None):
         if message is None:
             message = self.session.new_message()
-        self.console.print(
-            f"\n<<< {self.assistant.icon} [green] \[${self.model.money_spend(self.tokens)}]"
-        )
+        self.console.print(f"\n<<< {self.assistant.icon}")
         self.console.print(Padding(Markdown(message), (0, 4)))
         self.console.print("")
 
     def query_model(self, question):
         self.session.question(question)
-        response = self.ai_client.chat.completions.create(
-            messages=self.session.payload(), **self.model.settings()
-        )
-        self.session.answer(response.choices[0].message.content)
-        self.tokens += response.usage.total_tokens
+        answer = self.model.query(self.session)
+        self.session.answer(answer)
 
     # Chat commands
     def exit(self, question):
