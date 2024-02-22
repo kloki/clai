@@ -29,6 +29,7 @@ class Client:
             "\q": (self.exit, "Exit the program"),
             "\exit": (self.exit, "Exit the program"),
             "\quit": (self.exit, "Exit the program"),
+            "\\bye": (self.exit, "Exit the program"),
             "\c": (
                 self.copy_to_clipboard,
                 "Copy the last response to the clipboard",
@@ -72,7 +73,7 @@ class Client:
 
     def start(self):
         self.system_message(
-            f"Chat: {self.assistant.banner()} [green]🧠 {self.model.name}"
+            f"Chat: {self.assistant.banner()} [green]{self.model.icon} {self.model.name}"
         )
         while True:
             question = self.ask_user()

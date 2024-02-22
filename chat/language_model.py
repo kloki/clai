@@ -18,6 +18,7 @@ class GPT:
         self.client = OpenAI()
         self.name = name
         self._settings = self.settings()
+        self.icon = "🧠"
 
     def settings(self):
         return {
@@ -38,6 +39,7 @@ class OLLAMA:
     def __init__(self, name="dolphin-mistral"):
         self.name = name
         self.url = "http://127.0.0.1:11434/api/chat"
+        self.icon = "🐬"
 
     def query(self, session):
         payload = {"model": self.name, "messages": session.payload(), "stream": False}

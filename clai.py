@@ -19,10 +19,10 @@ def get_model(lm):
         if not os.getenv("OPENAI_API_KEY", "").startswith("sk-"):
             print("OPENAI_API_KEY not set!")
             exit()
-        GPT()
+        return GPT()
 
     elif lm == LLM.DOLPHIN_MIXTRAL:
-        OLLAMA(lm)
+        return OLLAMA(lm)
     return OLLAMA()
 
 
