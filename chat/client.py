@@ -1,185 +1,97 @@
-import json
-import uuid
-
 import pyperclip
-from prompt_toolkit import PromptSession
-from prompt_toolkit.completion import PathCompleter, WordCompleter, merge_completers
-from rich.console import Console
-from rich.live import Live
 from rich.markdown import Markdown
-from rich.padding import Padding
-from rich.prompt import Prompt
-from rich.spinner import Spinner
-from rich.table import Table
+from textual import on, work
+from textual.app import App, Widget
+from textual.events import Click
+from textual.widgets import Input, Label
 
-from .assistant import ASSISTANTS, assistants_table
-from .language_model import GPT
+from .assistant import ASSISTANTS
+from .language_model import Ollama
 from .session import Session
 
 
-class Client:
-    def __init__(self, assistant=None, model=GPT):
+class ChatItem(Label):
+
+    @on(Click)
+    async def on_click(self, event: Click) -> None:
+        pyperclip.copy(self.renderable.markup)
+        self.styles.animate("opacity", 0.5, duration=0.1)
+        self.styles.animate("opacity", 1.0, duration=0.1, delay=0.1)
+
+
+class UserLabel(Label):
+    pass
+
+
+class ChatBox(Widget):
+
+    def on_mount(self):
+        self.mount(Label())
+
+    def add_question(self, question):
+
+        self.mount(UserLabel("You", classes="user"))
+        self.mount(ChatItem(Markdown(question, code_theme="dracula")))
+        self.scroll_end()
+
+    def create_answer(self, name, content):
+        self.mount(UserLabel(name, classes="llm"))
+        self.mount(ChatItem(Markdown(content, code_theme="dracula")))
+        self.scroll_end()
+
+    def update_answer(self, content):
+        answer = self.query(ChatItem).last()
+        answer.update(Markdown(content, code_theme="dracula"))
+        self.scroll_end()
+
+
+class StatusBar(Label):
+    pass
+
+
+class Client(App):
+    CSS_PATH = "style.css"
+
+    def __init__(self, model=Ollama(), assistant=None):
+        super().__init__()
         self.assistant = assistant if assistant else ASSISTANTS["default"]
         self.session = Session(self.assistant)
-        self.console = Console()
         self.model = model
-        self.inserted_files = []
 
-        self.commands = {
-            "\q": (self.exit, "Exit the program"),
-            "\exit": (self.exit, "Exit the program"),
-            "\quit": (self.exit, "Exit the program"),
-            "\\bye": (self.exit, "Exit the program"),
-            "\c": (
-                self.copy_to_clipboard,
-                "Copy the last response to the clipboard",
-            ),
-            "\dump": (self.dump, "Dump the current chat thread to a file"),
-            "\switch": (self.switch, "Switch to a different assistatn"),
-            "\clear": (self.clear, "Clear the current chat thread"),
-            "\load": (
-                self.load,
-                "Load a file and add it to the context of the assistant",
-            ),
-            "\help": (self.help, "Display this help message"),
-            "\\assistant_instructions": (
-                self.instructions,
-                "List the instruction of the current assistant",
-            ),
-        }
-        self.prompt = PromptSession(
-            completer=merge_completers(
-                [PathCompleter(), WordCompleter(self.commands.keys(), sentence=True)]
-            )
+    def compose(self):
+        yield ChatBox()
+        yield Input(type="text", placeholder="Ask a question.")
+        yield StatusBar(
+            f"{self.assistant.banner()} - {self.model.icon}  {self.model.name}"
         )
 
-    def system_message(self, message, data=None):
-        self.console.print(f"[cyan]💡 {message}")
-        if data:
-            self.console.print(Padding(Markdown(data), (0, 4)))
+    @on(Input.Submitted)
+    def proces_question(self):
+        input = self.query_one(Input)
+        question = input.value
+        if question == "":
+            return
 
-    def ask_user(self):
-        return self.prompt.prompt(">>> ")
-
-    def dump_session(self, name):
-        with open(f"{name}.json", "w") as outfile:
-            json.dump(self.session.messages, outfile)
-
-    def ask_assistent(self, question):
-        with Live(
-            Spinner("dots12", style="green"), refresh_per_second=20, transient=True
-        ):
-            self.query_model(question)
-
-    def start(self):
-        self.system_message(
-            f"Chat: {self.assistant.banner()} [green]{self.model.icon} {self.model.name}"
-        )
-        while True:
-            question = self.ask_user()
-            if question and not self.system_command(question):
-                self.ask_assistent(question)
-                self.print_answer()
-
-    def print_answer(self, message=None):
-        if message is None:
-            message = self.session.new_message()
-        self.console.print(f"\n<<< {self.assistant.icon}")
-        self.console.print(Padding(Markdown(message), (0, 4)))
-        self.console.print("")
-
-    def query_model(self, question):
+        chatbox = self.query_one(ChatBox)
+        chatbox.add_question(question)
         self.session.question(question)
-        answer = self.model.query(self.session)
-        self.session.answer(answer)
+        chatbox.create_answer(self.model.icon, "...")
 
-    # Chat commands
-    def exit(self, question):
-        self.system_message("Exiting....")
-        exit()
+        input.clear()
+        input.disabled = True
+        input.placeholder = "Processing..."
+        self.fetch_answer()
 
-    def help(self, question):
-        table = Table("command", "description")
-        for k, v in self.commands.items():
-            table.add_row(k, v[1])
-        self.system_message("System commands")
-        self.console.print(Padding(table, (0, 4)))
+    @work(exclusive=True)
+    async def fetch_answer(self) -> None:
+        chatbox = self.query_one(ChatBox)
 
-    def instructions(self, question):
-        data = "\n".join([f"- {m['content']}" for m in self.assistant.instructions()])
-        self.system_message("Assistant instructions:", data=data)
-        if self.inserted_files:
-            data = "\n".join([f"- {f}" for f in self.inserted_files])
-
-            self.system_message("Loaded Files:", data=data)
-
-    def clear(self, question):
-        self.system_message("Clearing session.")
-        self.clear_session()
-        self.inserted_files = []
-        self.tokens = 0
-
-    def dump(self, question):
-        guid = str(uuid.uuid4())
-        self.system_message(f"Dumping session to {guid}.json")
-        self.dump_session(guid)
-
-    def load(self, question):
-        content = ""
-        file = ""
-        try:
-            file = question.split(" ")[1]
-            with open(file, "r") as infile:
-                content = infile.read()
-        except (IndexError, IsADirectoryError, FileNotFoundError):
-            self.system_message("Invalid File")
-            return
-        if not content:
-            self.system_message("Invalid File")
-            return
-        payload = f"This it the content of the file `{file}`:\n ```{content}```"
-        self.session.question(payload)
-        self.inserted_files.append(payload)
-        self.system_message(f"Added {file} to context of assistant.")
-
-    def clear_session(self):
-        self.session = Session(self.assistant)
-
-    def switch(self, question):
-        items = question.split(" ")
-        if len(items) > 1 and items[1] in ASSISTANTS.keys():
-            assistant_id = items[1]
-        else:
-            self.system_message("Choose assistent")
-            self.console.print(Padding(assistants_table(), (0, 4)))
-            assistant_id = Prompt.ask(
-                choices=ASSISTANTS.keys(),
-                default="default",
-            )
-        self.system_message(f"Switching to {assistant_id}")
-        self.assistant = ASSISTANTS[assistant_id]
-        self.clear_session()
-
-    def copy_to_clipboard(self, question):
-        content = self.session.messages[-1]["content"]
-        if "```" in content:
-            content = content.split("```")[1]
-            self.system_message("Copied text block in last response to clipboard")
-        else:
-            self.system_message("Copied last response to clipboard")
-
-        pyperclip.copy(content)
-
-    def system_command(self, question):
-        if question[0] not in ["\\", "/", "."]:
-            return False
-
-        if question[0] in ["/", "."]:
-            question = "\load " + question
-        command = question.split(" ")[0]
-
-        if command not in self.commands:
-            self.system_message("Unknow command!")
-            command = "\help"
-        self.commands[command][0](question)
-        return True
+        result = ""
+        async for chunk in self.model.query(self.session):
+            result += chunk
+            chatbox.update_answer(result)
+        self.session.answer(result)
+        input = self.query_one(Input)
+        input.disabled = False
+        input.placeholder = "Ask a question."
+        input.focus()

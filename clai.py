@@ -1,44 +1,46 @@
 #!/usr/bin/env python3
-import enum
+
 import os
 
-import typer
-from rich import print
+import click
 
-from chat import Chat
-from chat.assistant import ASSISTANTS, assistants_table
-from chat.language_model import GPT, LLM, OLLAMA
-
-app = typer.Typer(help="Cli to interact with OpenAI chat models")
-
-assistants_enum = enum.Enum("Roles", dict([(d, d) for d in ASSISTANTS.keys()]))
+from chat import Client
+from chat.assistant import ASSISTANTS
+from chat.language_model import Dummy, Ollama, OpenAI
 
 
 def get_model(lm):
-    if lm == LLM.GPT4:
+    if lm == "gpt":
         if not os.getenv("OPENAI_API_KEY", "").startswith("sk-"):
             print("OPENAI_API_KEY not set!")
             exit()
-        return GPT()
+        return OpenAI()
 
-    elif lm == LLM.DOLPHIN_MIXTRAL:
-        return OLLAMA(lm)
-    return OLLAMA()
+    if lm == "dummy":
+        return Dummy()
+    if lm == "dolphin_+":
+        return Ollama("dolphin-mixtral")
+    return Ollama()
 
 
-@app.command(name="chat", help="Start chat session.")
-def chat_command(
-    assistant: assistants_enum = typer.Argument(
-        default="default", help="Assistant profile to be used."
-    ),
-    lm: LLM = typer.Option(default=LLM.DOLPHIN_MISTRAL, help="lm to be used"),
+@click.command()
+@click.option(
+    "-l",
+    "--llm",
+    type=click.Choice(["dummy", "dolphin", "dolpin+", "gpt"]),
+    default="dummy",
+)
+@click.option(
+    "-a", "--assistant", type=click.Choice(list(ASSISTANTS.keys())), default="default"
+)
+def app(
+    llm,
+    assistant,
 ):
-    Chat(ASSISTANTS[assistant.value], get_model(lm)).start()
-
-
-@app.command(name="assistants", help="List all available assisent profiles")
-def assistants():
-    print(assistants_table())
+    model = get_model(llm)
+    assistant = ASSISTANTS[assistant]
+    tui = Client(model, assistant)
+    tui.run()
 
 
 if __name__ == "__main__":

@@ -2,13 +2,18 @@
 
 ![Example](./example.png)
 
-Clai is cli version of "chatGPT". It requires a OpenAI api key. These can be found [here](https://beta.openai.com/account/api-keys)
+I minimalist terminal chat client for llm that works for me.
 
-Next to basic chat it allows loading specific assistant profiles.
+# Featurs
+
+- Streaming responses.
+- Renders Markdown.
+- Supports: OpenAI and Ollama.
+- Supports assistant profiles.
 
 # Run
 
 ```
 poetry install
-OPENAI_API_KEY=sk_.....  ./clai.py --help
+./clai.py --help
 ```
