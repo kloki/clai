@@ -1,7 +1,7 @@
 import asyncio
 import time
 
-from textual import on
+from textual import on, work
 from textual.app import App, Widget
 from textual.reactive import reactive
 from textual.widgets import Input, Label
@@ -16,10 +16,8 @@ class Question(Label):
 
 
 class Answer(Label):
-    content = reactive("content", layout=True)
 
-    def render(self) -> str:
-        return self.content
+    pass
 
 
 class ChatBox(Widget):
@@ -30,10 +28,13 @@ class ChatBox(Widget):
         self.scroll_down()
 
     def create_answer(self, content):
-        answer = Answer(content)
         self.mount(Answer(content))
         self.scroll_down()
-        return answer
+
+    def update_answer(self, content):
+        answer = self.query(Answer).last()
+        answer.update(content)
+        self.scroll_down()
 
 
 class StatusBar(Label):
@@ -65,12 +66,18 @@ class Client(App):
 
         chatbox = self.query_one(ChatBox)
         chatbox.add_question(question)
-        answer = chatbox.create_answer("...")
+        chatbox.create_answer("...")
 
-        async def response_task():
-            for t in ["asht", "asthwasht", "ash", "ashtashttht"]:
-                time.sleep(1)
-                answer.update(t)
+        input.clear()
+        input.disabled = True
+        self.fetch_answer()
 
-        asyncio.create_task(response_task())
-        input.value = ""
+    @work(exclusive=True)
+    async def fetch_answer(self) -> None:
+        chatbox = self.query_one(ChatBox)
+
+        for t in ["asht", "ashtasht", "asht", "done\n\n\n\n\n\n"]:
+            chatbox.update_answer(t)
+        input = self.query_one(Input)
+        input.disabled = False
+        input.focus()

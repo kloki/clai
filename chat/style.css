@@ -9,6 +9,12 @@ ChatBox {
 
   height: 100%;
   overflow: auto auto;
+  scrollbar-background: #282a36;
+  scrollbar-background-hover: #282a36;
+  scrollbar-background-active: #282a36;
+  scrollbar-color: #444750;
+  scrollbar-color-hover: #444750;
+  scrollbar-color-active: #bd93f9;
 }
 Input {
   height: 3;
@@ -19,6 +25,9 @@ Input {
   dock: bottom;
 }
 
+Input:disabled {
+  border: tall #ff5555;
+}
 StatusBar {
   color: #282a36;
   height: 1;
