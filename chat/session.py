@@ -1,7 +1,8 @@
 class Session:
     def __init__(self, role):
         self.role = role
-        self.messages = role.instructions()
+        self.base = role.instructions()
+        self.messages = []
 
     def question(self, question):
         self.messages.append({"role": "user", "content": question})
@@ -10,7 +11,4 @@ class Session:
         self.messages.append({"role": "assistant", "content": answer})
 
     def payload(self):
-        return self.messages
-
-    def new_message(self):
-        return self.messages[-1]["content"]
+        return self.base + self.messages

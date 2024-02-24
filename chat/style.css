@@ -1,0 +1,43 @@
+Screen {
+  background: #282a36;
+  margin: 0;
+  padding: 0;
+}
+
+ChatBox {
+  padding-bottom: 2;
+
+  height: 100%;
+  overflow: auto auto;
+}
+Input {
+  height: 3;
+  padding-left: 1;
+  margin-bottom: 1;
+  border: tall #44475a;
+  width: 100%;
+  dock: bottom;
+}
+
+StatusBar {
+  color: #282a36;
+  height: 1;
+  margin: 0;
+  padding-right: 1;
+  width: 100%;
+  background: #50fa7b;
+  text-align: right;
+  dock: bottom;
+}
+
+Question {
+  padding-left: 1;
+  padding-right: 1;
+  border: tall #44475a;
+}
+
+Answer {
+  padding-left: 1;
+  padding-right: 1;
+  border: tall #44475a;
+}
