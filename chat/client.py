@@ -1,5 +1,8 @@
+import pyperclip
+from rich.markdown import Markdown
 from textual import on, work
 from textual.app import App, Widget
+from textual.events import Click
 from textual.widgets import Input, Label
 
 from .assistant import ASSISTANTS
@@ -7,29 +10,38 @@ from .language_model import Ollama
 from .session import Session
 
 
-class Question(Label):
-    pass
+class ChatItem(Label):
+
+    @on(Click)
+    async def on_click(self, event: Click) -> None:
+        pyperclip.copy(self.renderable.markup)
+        self.styles.animate("opacity", 0.5, duration=0.1)
+        self.styles.animate("opacity", 1.0, duration=0.1, delay=0.1)
 
 
-class Answer(Label):
-
+class UserLabel(Label):
     pass
 
 
 class ChatBox(Widget):
 
+    def on_mount(self):
+        self.mount(Label())
+
     def add_question(self, question):
 
-        self.mount(Question(question))
+        self.mount(UserLabel("You", classes="user"))
+        self.mount(ChatItem(Markdown(question, code_theme="dracula")))
         self.scroll_end()
 
-    def create_answer(self, content):
-        self.mount(Answer(content))
+    def create_answer(self, name, content):
+        self.mount(UserLabel(name, classes="llm"))
+        self.mount(ChatItem(Markdown(content, code_theme="dracula")))
         self.scroll_end()
 
     def update_answer(self, content):
-        answer = self.query(Answer).last()
-        answer.update(content)
+        answer = self.query(ChatItem).last()
+        answer.update(Markdown(content, code_theme="dracula"))
         self.scroll_end()
 
 
@@ -50,7 +62,7 @@ class Client(App):
         yield ChatBox()
         yield Input(type="text", placeholder="Ask a question.")
         yield StatusBar(
-            f"{self.assistant.banner()} - {self.model.icon} {self.model.name}"
+            f"{self.assistant.banner()} - {self.model.icon}  {self.model.name}"
         )
 
     @on(Input.Submitted)
@@ -63,18 +75,23 @@ class Client(App):
         chatbox = self.query_one(ChatBox)
         chatbox.add_question(question)
         self.session.question(question)
-        chatbox.create_answer("...")
+        chatbox.create_answer(self.model.icon, "...")
 
         input.clear()
         input.disabled = True
+        input.placeholder = "Processing..."
         self.fetch_answer()
 
     @work(exclusive=True)
     async def fetch_answer(self) -> None:
         chatbox = self.query_one(ChatBox)
 
-        async for result in self.model.query(self.session.payload()):
+        result = ""
+        async for chunk in self.model.query(self.session):
+            result += chunk
             chatbox.update_answer(result)
+        self.session.answer(result)
         input = self.query_one(Input)
         input.disabled = False
+        input.placeholder = "Ask a question."
         input.focus()

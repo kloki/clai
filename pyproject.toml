@@ -12,6 +12,8 @@ rich = "^13.3.4"
 requests = "^2.31.0"
 textual = "^0.52.1"
 click = "^8.1.7"
+ollama = "^0.1.6"
+pyperclip = "^1.8.2"
 
 
 [tool.poetry.group.dev.dependencies]
