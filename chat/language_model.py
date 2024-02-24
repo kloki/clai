@@ -1,16 +1,10 @@
-from enum import Enum
+import asyncio
 
 import requests
 from openai import OpenAI
 
 
-class LLM(str, Enum):
-    GPT4 = "gpt4"
-    DOLPHIN_MISTRAL = "dolphin-mistral"
-    DOLPHIN_MIXTRAL = "dolphin-mixtral"
-
-
-class GPT:
+class OpenAIClient:
 
     def __init__(self, name="gpt-4", temperature=1, top_p=1):
         self.temperature = temperature
@@ -34,7 +28,7 @@ class GPT:
         return response.choices[0].message.content
 
 
-class OLLAMA:
+class Ollama:
 
     def __init__(self, name="dolphin-mistral"):
         self.name = name
@@ -45,3 +39,15 @@ class OLLAMA:
         payload = {"model": self.name, "messages": session.payload(), "stream": False}
         response = requests.post(self.url, json=payload)
         return response.json()["message"]["content"]
+
+
+class Dummy:
+
+    def __init__(self):
+        self.name = "dummy"
+        self.icon = "🗑️"
+
+    async def query(self, session):
+        for i in ["1", "1...", "2...", "Done"]:
+            await asyncio.sleep(0.5)
+            yield i

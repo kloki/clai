@@ -1,13 +1,9 @@
-import asyncio
-import time
-
 from textual import on, work
 from textual.app import App, Widget
-from textual.reactive import reactive
 from textual.widgets import Input, Label
 
 from .assistant import ASSISTANTS
-from .language_model import OLLAMA
+from .language_model import Ollama
 from .session import Session
 
 
@@ -25,16 +21,16 @@ class ChatBox(Widget):
     def add_question(self, question):
 
         self.mount(Question(question))
-        self.scroll_down()
+        self.scroll_end()
 
     def create_answer(self, content):
         self.mount(Answer(content))
-        self.scroll_down()
+        self.scroll_end()
 
     def update_answer(self, content):
         answer = self.query(Answer).last()
         answer.update(content)
-        self.scroll_down()
+        self.scroll_end()
 
 
 class StatusBar(Label):
@@ -44,7 +40,7 @@ class StatusBar(Label):
 class Client(App):
     CSS_PATH = "style.css"
 
-    def __init__(self, assistant=None, model=OLLAMA()):
+    def __init__(self, model=Ollama(), assistant=None):
         super().__init__()
         self.assistant = assistant if assistant else ASSISTANTS["default"]
         self.session = Session(self.assistant)
@@ -66,6 +62,7 @@ class Client(App):
 
         chatbox = self.query_one(ChatBox)
         chatbox.add_question(question)
+        self.session.question(question)
         chatbox.create_answer("...")
 
         input.clear()
@@ -76,8 +73,8 @@ class Client(App):
     async def fetch_answer(self) -> None:
         chatbox = self.query_one(ChatBox)
 
-        for t in ["asht", "ashtasht", "asht", "done\n\n\n\n\n\n"]:
-            chatbox.update_answer(t)
+        async for result in self.model.query(self.session.payload()):
+            chatbox.update_answer(result)
         input = self.query_one(Input)
         input.disabled = False
         input.focus()
