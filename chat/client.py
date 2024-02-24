@@ -3,6 +3,7 @@ import time
 
 from textual import on
 from textual.app import App, Widget
+from textual.reactive import reactive
 from textual.widgets import Input, Label
 
 from .assistant import ASSISTANTS
@@ -15,7 +16,10 @@ class Question(Label):
 
 
 class Answer(Label):
-    pass
+    content = reactive("content", layout=True)
+
+    def render(self) -> str:
+        return self.content
 
 
 class ChatBox(Widget):
