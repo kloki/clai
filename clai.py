@@ -6,7 +6,7 @@ import click
 
 from chat import Client
 from chat.assistant import ASSISTANTS
-from chat.language_model import Dummy, Ollama, OpenAI
+from chat.language_model import LLM
 
 
 def get_model(lm):
@@ -14,20 +14,14 @@ def get_model(lm):
         if not os.getenv("OPENAI_API_KEY", "").startswith("sk-"):
             print("OPENAI_API_KEY not set!")
             exit()
-        return OpenAI()
-
-    if lm == "dummy":
-        return Dummy()
-    if lm == "dolphin_+":
-        return Ollama("dolphin-mixtral")
-    return Ollama()
+    return LLM[lm]
 
 
 @click.command()
 @click.option(
     "-l",
     "--llm",
-    type=click.Choice(["dummy", "dolphin", "dolpin+", "gpt"]),
+    type=click.Choice(list(LLM.keys())),
     default="dolphin",
 )
 @click.option(

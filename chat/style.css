@@ -72,3 +72,14 @@ UserLabel {
   padding-right: 1;
   width: 6;
 }
+
+Toast {
+  background: #44475a;
+  border-right: none;
+  width: auto;
+}
+
+ToastRack {
+  align: right top;
+  margin-top: 1;
+}

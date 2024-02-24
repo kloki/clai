@@ -6,7 +6,7 @@ from textual.events import Click
 from textual.widgets import Input, Label
 
 from .assistant import ASSISTANTS
-from .language_model import Ollama
+from .language_model import Ollama, get_next_llm
 from .session import Session
 
 
@@ -44,6 +44,10 @@ class ChatBox(Widget):
         answer.update(Markdown(content, code_theme="dracula"))
         self.scroll_end()
 
+    def reset(self):
+        self.remove_children()
+        self.mount(Label())
+
 
 class StatusBar(Label):
     pass
@@ -51,6 +55,12 @@ class StatusBar(Label):
 
 class Client(App):
     CSS_PATH = "style.css"
+    BINDINGS = [
+        ("ctrl+x", "quit", "Quit"),
+        ("ctrl+c", "clear_session()", "Clear"),
+        ("ctrl+j", "dump_session()", "Dump"),
+        ("ctrl+t", "toggle_llm()", "Toggle llm"),
+    ]
 
     def __init__(self, model=Ollama(), assistant=None):
         super().__init__()
@@ -61,9 +71,24 @@ class Client(App):
     def compose(self):
         yield ChatBox()
         yield Input(type="text", placeholder="Ask a question.")
-        yield StatusBar(
-            f"{self.assistant.banner()} - {self.model.icon}  {self.model.name}"
-        )
+        yield StatusBar(self.status_bar_content())
+
+    def status_bar_content(self):
+        return f"{self.assistant.banner()} - {self.model.icon}  {self.model.name}"
+
+    def action_clear_session(self):
+        self.session.reset()
+        self.query_one(ChatBox).reset()
+        self.notify("Cleared")
+
+    def action_dump_session(self):
+        name = self.session.dump()
+        self.notify(f"Dumped session to: {name}")
+
+    def action_toggle_llm(self):
+        self.model = get_next_llm(self.model)
+        self.query_one(StatusBar).update(self.status_bar_content())
+        self.notify(f"Toggled to {self.model.icon} {self.model.name}")
 
     @on(Input.Submitted)
     def proces_question(self):
@@ -95,3 +120,6 @@ class Client(App):
         input.disabled = False
         input.placeholder = "Ask a question."
         input.focus()
+
+    def key_space(self) -> None:
+        self.bell()

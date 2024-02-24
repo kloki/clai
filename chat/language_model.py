@@ -32,12 +32,13 @@ class OpenAI:
 
 class Ollama:
 
-    def __init__(self, name="dolphin-mistral"):
+    def __init__(self, name="llama2", icon="🦙"):
         self.name = name
-        self.icon = "🐬"
+        self.icon = icon
+        self.client = OllamaClient()
 
     async def query(self, session):
-        stream = OllamaClient().chat(
+        stream = self.client.chat(
             model=self.name, messages=session.payload(), stream=True
         )
         async for chunk in await stream:
@@ -54,3 +55,18 @@ class Dummy:
         for i in ["1", "...", "2", "...", "Done"]:
             await asyncio.sleep(0.0)
             yield i
+
+
+LLM = {
+    "dolphin": Ollama("dolphin-mistral", icon="🐬"),
+    "dolphin-mixtral": Ollama("dolphin-mixtral", icon="🐬💪"),
+    "gpt": OpenAI(),
+    "dummy": Dummy(),
+}
+
+LLM_ORDER = list(LLM.values())
+
+
+def get_next_llm(model):
+    index = LLM_ORDER.index(model) + 1
+    return LLM_ORDER[index % len(LLM_ORDER)]
