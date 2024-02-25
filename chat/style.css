@@ -2,11 +2,11 @@ Screen {
   background: #282a36;
   margin: 0;
   padding: 0;
+  color: #f8f8f2;
 }
 
 ChatBox {
   padding-bottom: 2;
-
   height: 100%;
   overflow: auto auto;
   scrollbar-background: #282a36;
@@ -19,7 +19,6 @@ ChatBox {
 Input {
   height: 3;
   padding-left: 1;
-
   border: tall #bd93f9;
   background: #282a36;
   width: 100%;
@@ -51,8 +50,6 @@ ChatItem {
 .chatlabel {
   color: #282a36;
   margin-left: 2;
-  padding-left: 1;
-  padding-right: 1;
   width: 6;
   background: #50fa7b;
   content-align: center middle;
