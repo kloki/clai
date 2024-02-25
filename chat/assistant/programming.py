@@ -77,3 +77,15 @@ ASSISTANTS["bash"] = Assistant(
         "You are a helpful assistant helping a developer using the unix cli. You will provide help with bash and unix commands"
     ],
 )
+
+
+ASSISTANTS["snippet"] = Assistant(
+    "✂️ ",
+    "The code snippet assistant",
+    [
+        "* You are a helpful assistant helping a developer."
+        "* The developer will ask you for code snippets in different programming languages."
+        "* You ONLY respond with a Markdown codeblock."
+        "* Any explanation should be provided in comments inside tho codeblock"
+    ],
+)

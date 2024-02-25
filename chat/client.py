@@ -14,7 +14,14 @@ class ChatItem(Label):
 
     @on(Click)
     async def on_click(self, event: Click) -> None:
-        pyperclip.copy(self.renderable.markup)
+        contents = self.renderable.markup
+
+        # We quess the item only contains a code block. If so strip the
+        # Markdown annotation
+        if contents.startswith("```") and contents.endswith("```"):
+            contents = "\n".join(contents.split("\n")[1:-1])
+        pyperclip.copy(contents)
+        self.notify(" Copied")
         self.styles.animate("opacity", 0.5, duration=0.1)
         self.styles.animate("opacity", 1.0, duration=0.1, delay=0.1)
 
@@ -84,16 +91,16 @@ class Client(App):
     def action_clear_session(self):
         self.session.reset()
         self.query_one(ChatBox).reset()
-        self.notify("Cleared")
+        self.notify("󰆴 Cleared")
 
     def action_dump_session(self):
         name = self.session.dump()
-        self.notify(f"Dumped session to: {name}")
+        self.notify(f"󰱧  Dumped session to: {name}")
 
     def action_toggle_llm(self):
         self.model = get_next_llm(self.model)
         self.query_one(".statusbar").update(self.status_bar_content())
-        self.notify(f"Toggled to {self.model.icon} {self.model.name}")
+        self.notify(f"󰀙 Toggled to {self.model.icon} {self.model.name}")
 
     @on(Input.Submitted)
     def proces_question(self):
