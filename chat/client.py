@@ -28,20 +28,24 @@ class ChatBox(Widget):
     def on_mount(self):
         self.mount(Label())
 
+    @staticmethod
+    def md(content):
+        return Markdown(content, code_theme="dracula")
+
     def add_question(self, question):
 
-        self.mount(UserLabel("You", classes="user"))
-        self.mount(ChatItem(Markdown(question, code_theme="dracula")))
+        self.mount(Label("You", classes="chatlabel user"))
+        self.mount(ChatItem(self.md(question)))
         self.scroll_end()
 
     def create_answer(self, name, content):
-        self.mount(UserLabel(name, classes="llm"))
-        self.mount(ChatItem(Markdown(content, code_theme="dracula")))
+        self.mount(Label(name, classes="chatlabel llm"))
+        self.mount(ChatItem(self.md(content)))
         self.scroll_end()
 
     def update_answer(self, content):
         answer = self.query(ChatItem).last()
-        answer.update(Markdown(content, code_theme="dracula"))
+        answer.update(self.md(content))
         self.scroll_end()
 
     def reset(self):
@@ -50,6 +54,7 @@ class ChatBox(Widget):
 
 
 class StatusBar(Label):
+
     pass
 
 
@@ -71,7 +76,7 @@ class Client(App):
     def compose(self):
         yield ChatBox()
         yield Input(type="text", placeholder="Ask a question.")
-        yield StatusBar(self.status_bar_content())
+        yield Label(self.status_bar_content(), classes="statusbar")
 
     def status_bar_content(self):
         return f"{self.assistant.banner()} - {self.model.icon}  {self.model.name}"
@@ -87,7 +92,7 @@ class Client(App):
 
     def action_toggle_llm(self):
         self.model = get_next_llm(self.model)
-        self.query_one(StatusBar).update(self.status_bar_content())
+        self.query_one(".statusbar").update(self.status_bar_content())
         self.notify(f"Toggled to {self.model.icon} {self.model.name}")
 
     @on(Input.Submitted)
@@ -100,7 +105,7 @@ class Client(App):
         chatbox = self.query_one(ChatBox)
         chatbox.add_question(question)
         self.session.question(question)
-        chatbox.create_answer(self.model.icon, "...")
+        chatbox.create_answer(self.assistant.icon, "...")
 
         input.clear()
         input.disabled = True

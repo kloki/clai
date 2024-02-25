@@ -30,7 +30,7 @@ Input {
 Input:disabled {
   border: tall #44475a;
 }
-StatusBar {
+.statusbar {
   background: #44475a;
   height: 1;
   margin: 0;
@@ -48,13 +48,14 @@ ChatItem {
   max-width: 100%;
 }
 
-UserLabel {
+.chatlabel {
   color: #282a36;
   margin-left: 2;
   padding-left: 1;
   padding-right: 1;
   width: 6;
   background: #50fa7b;
+  content-align: center middle;
 }
 
 .user {
