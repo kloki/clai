@@ -11,7 +11,6 @@ from .session import Session
 
 
 class ChatItem(Label):
-
     @on(Click)
     async def on_click(self, event: Click) -> None:
         contents = self.renderable.markup
@@ -31,7 +30,6 @@ class UserLabel(Label):
 
 
 class ChatBox(Widget):
-
     def on_mount(self):
         self.mount(Label())
 
@@ -40,7 +38,6 @@ class ChatBox(Widget):
         return Markdown(content, code_theme="dracula")
 
     def add_question(self, question):
-
         self.mount(Label("You", classes="chatlabel user"))
         self.mount(ChatItem(self.md(question)))
         self.scroll_end()
@@ -61,7 +58,6 @@ class ChatBox(Widget):
 
 
 class StatusBar(Label):
-
     pass
 
 

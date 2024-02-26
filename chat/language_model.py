@@ -5,7 +5,6 @@ from openai import AsyncOpenAI as OpenAIClient
 
 
 class OpenAI:
-
     def __init__(self, name="gpt-4", temperature=1, top_p=1):
         self.temperature = temperature
         self.top_p = top_p
@@ -31,7 +30,6 @@ class OpenAI:
 
 
 class Ollama:
-
     def __init__(self, name="llama2", icon="🦙"):
         self.name = name
         self.icon = icon
@@ -46,7 +44,6 @@ class Ollama:
 
 
 class Dummy:
-
     def __init__(self):
         self.name = "dummy"
         self.icon = "🗑️"
