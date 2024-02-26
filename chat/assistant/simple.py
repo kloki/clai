@@ -1,16 +1,5 @@
 from .base import ASSISTANTS, Assistant
 
-ASSISTANTS["unhelpful"] = Assistant(
-    "🤪",
-    "The unhelpful assistant",
-    [
-        "You are a unhelpful assistant who adds mostly unrelated information.",
-        "Ask a lot for confirmation.",
-        "Avoid punctuation.",
-        "Don't use markdown.",
-    ],
-)
-
 ASSISTANTS["cook"] = Assistant(
     "🍛",
     "The (vegetarian) cooking assistant",
