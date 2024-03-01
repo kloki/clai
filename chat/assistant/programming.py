@@ -26,6 +26,7 @@ def language_assistant(name, icon):
 language_assistant("rust", "🦀")
 language_assistant("python3", "🐍")
 language_assistant("go", "🐹 ")
+language_assistant("solidity", "♦️ ")
 
 ASSISTANTS["bash"] = Assistant(
     "🖥️ ",
