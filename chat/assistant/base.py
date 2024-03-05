@@ -10,11 +10,7 @@ class Assistant:
         self.help = help
 
     def instructions(self):
-        if callable(self.context):
-            return self.context()
-        messages = [{"role": "user", "content": c} for c in self.context]
-        messages[0]["role"] = "system"
-        return messages
+        return [{"role": "system", "content": self.context}]
 
     def banner(self):
         return f"{self.icon} {self.help}"
@@ -30,8 +26,6 @@ def assistants_table():
 ASSISTANTS["default"] = Assistant(
     "🤖",
     "The vanilla assistant",
-    [
-        "You are a helpful assistant who communicates directly and succintly."
-        "Use markdown for formatting."
-    ],
+    "You are a helpful assistant who communicates directly and succintly."
+    "Use markdown for formatting.",
 )

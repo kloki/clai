@@ -1,5 +1,6 @@
 import asyncio
 
+from anthropic import AsyncAnthropic as AnthropicClient
 from ollama import AsyncClient as OllamaClient
 from openai import AsyncOpenAI as OpenAIClient
 
@@ -43,6 +44,26 @@ class Ollama:
             yield chunk["message"]["content"]
 
 
+class Anthropic:
+    def __init__(self, name="claude-3-opus-20240229", icon="🙆"):
+        self.name = name
+        self.icon = icon
+        self.client = AnthropicClient()
+
+    async def query(self, session):
+        system, payload = session.payload_anthropic()
+        stream = await self.client.messages.create(
+            model=self.name,
+            messages=payload,
+            system=system,
+            stream=True,
+            max_tokens=1024,
+        )
+        async for event in stream:
+            if event.type == "content_block_delta":
+                yield event.delta.text
+
+
 class Dummy:
     def __init__(self):
         self.name = "dummy"
@@ -59,6 +80,7 @@ LLM = {
     "dolphin-mixtral": Ollama("dolphin-mixtral", icon="🐬💪"),
     "gpt": OpenAI(),
     "dummy": Dummy(),
+    "anthropic": Anthropic(),
 }
 
 LLM_ORDER = list(LLM.values())
