@@ -21,7 +21,7 @@ class Session:
         return self.base[0]["content"], self.messages
 
     def reset(self):
-        self.messages = self.role.instructions()
+        self.messages = []
 
     def dump(self):
         name = f"{uuid4()}.json"
