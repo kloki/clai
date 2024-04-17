@@ -61,6 +61,9 @@ ChatItem {
 .llm {
   background: #44475a;
 }
+.filebox {
+  background: #ffb86c;
+}
 
 UserLabel {
   color: #282a36;

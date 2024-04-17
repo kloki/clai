@@ -48,6 +48,11 @@ class ChatBox(Widget):
         self.mount(ChatItem(self.md(content)))
         self.scroll_end()
 
+    def create_filebox(self, content):
+        self.mount(Label("<>", classes="chatlabel filebox"))
+        self.mount(ChatItem(self.md(content)))
+        self.scroll_end()
+
     def update_answer(self, content):
         answer = self.query(ChatItem).last()
         answer.update(self.md(content))
@@ -97,8 +102,13 @@ class Client(App):
         self.notify(f"󰱧  Dumped session to: {name}")
 
     def action_add_context(self):
-        self.context = pyperclip.paste()
-        self.notify(" Added clipboard to context")
+        paste = pyperclip.paste()
+        if paste == "":
+            return
+        paste = f"```{guess_lexer(paste).name}\n{paste}\n```"
+        chatbox = self.query_one(ChatBox)
+        chatbox.create_filebox(paste)
+        self.context = f"{self.context}\n{paste}"
 
     def action_toggle_llm(self):
         self.model = get_next_llm(self.model)
@@ -109,18 +119,21 @@ class Client(App):
     def proces_question(self):
         input = self.query_one(Input)
         question = input.value
+        # Do not process empty questions
         if question == "":
             return
-        if self.context:
-            question = (
-                f"```{guess_lexer(self.context).name}\n{self.context}\n```\n{question}"
-            )
 
+        # Add question in UI
         chatbox = self.query_one(ChatBox)
         chatbox.add_question(question)
-        self.session.question(question)
-        chatbox.create_answer(self.assistant.icon, "...")
 
+        # If context append it to the question before sending it to llm
+        if self.context:
+            question = f"{self.context}\n{question}"
+            self.context = ""
+        self.session.question(question)
+
+        chatbox.create_answer(self.assistant.icon, "...")
         input.clear()
         input.disabled = True
         input.placeholder = "Processing..."
