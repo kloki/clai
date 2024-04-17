@@ -6,7 +6,7 @@ from openai import AsyncOpenAI as OpenAIClient
 
 
 class OpenAI:
-    def __init__(self, name="gpt-4", temperature=1, top_p=1):
+    def __init__(self, name="gpt-4-turbo-preview", temperature=1, top_p=1):
         self.temperature = temperature
         self.top_p = top_p
         self.client = OpenAIClient()

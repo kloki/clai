@@ -1,2 +1,2 @@
-from . import programming, simple
+from . import pokemon, programming, simple
 from .base import ASSISTANTS, assistants_table
