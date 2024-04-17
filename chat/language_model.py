@@ -77,6 +77,7 @@ class Dummy:
 
 LLM = {
     "dolphin": Ollama("dolphin-mistral", icon="🐬"),
+    "tinydolphin": Ollama("tinydolphin", icon="🐬🤏"),
     "dolphin-mixtral": Ollama("dolphin-mixtral", icon="🐬💪"),
     "gpt": OpenAI(),
     "dummy": Dummy(),

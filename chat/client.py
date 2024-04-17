@@ -1,4 +1,5 @@
 import pyperclip
+from pygments.lexers import guess_lexer
 from rich.markdown import Markdown
 from textual import on, work
 from textual.app import App, Widget
@@ -66,6 +67,7 @@ class Client(App):
     BINDINGS = [
         ("ctrl+x", "quit", "Quit"),
         ("ctrl+c", "clear_session()", "Clear"),
+        ("ctrl+v", "add_context()", "Context"),
         ("ctrl+j", "dump_session()", "Dump"),
         ("ctrl+t", "toggle_llm()", "Toggle llm"),
     ]
@@ -75,6 +77,7 @@ class Client(App):
         self.assistant = assistant if assistant else ASSISTANTS["default"]
         self.session = Session(self.assistant)
         self.model = model
+        self.context = ""
 
     def compose(self):
         yield ChatBox()
@@ -93,6 +96,10 @@ class Client(App):
         name = self.session.dump()
         self.notify(f"󰱧  Dumped session to: {name}")
 
+    def action_add_context(self):
+        self.context = pyperclip.paste()
+        self.notify(" Added clipboard to context")
+
     def action_toggle_llm(self):
         self.model = get_next_llm(self.model)
         self.query_one(".statusbar").update(self.status_bar_content())
@@ -104,6 +111,10 @@ class Client(App):
         question = input.value
         if question == "":
             return
+        if self.context:
+            question = (
+                f"```{guess_lexer(self.context).name}\n{self.context}\n```\n{question}"
+            )
 
         chatbox = self.query_one(ChatBox)
         chatbox.add_question(question)
@@ -113,6 +124,7 @@ class Client(App):
         input.clear()
         input.disabled = True
         input.placeholder = "Processing..."
+
         self.fetch_answer()
 
     @work(exclusive=True)
@@ -128,6 +140,3 @@ class Client(App):
         input.disabled = False
         input.placeholder = "Ask a question."
         input.focus()
-
-    def key_space(self) -> None:
-        self.bell()

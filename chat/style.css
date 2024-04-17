@@ -25,7 +25,6 @@ Input {
   max-width: 100%;
   dock: bottom;
 }
-
 Input:disabled {
   border: tall #44475a;
 }
