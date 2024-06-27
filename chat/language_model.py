@@ -6,7 +6,7 @@ from openai import AsyncOpenAI as OpenAIClient
 
 
 class OpenAI:
-    def __init__(self, name="gpt-4-turbo-preview", temperature=1, top_p=1):
+    def __init__(self, name="gpt-4o", temperature=1, top_p=1):
         self.temperature = temperature
         self.top_p = top_p
         self.client = OpenAIClient()
@@ -76,11 +76,10 @@ class Dummy:
 
 
 LLM = {
-    "dolphin": Ollama("dolphin-mistral", icon="🐬"),
+    "dolphin": Ollama("dolphin-llama3", icon="🐬"),
     "tinydolphin": Ollama("tinydolphin", icon="🐬🤏"),
-    "dolphin-mixtral": Ollama("dolphin-mixtral", icon="🐬💪"),
+    "bigdolphin": Ollama("dolphin-mistral:7b-v2.8-fp16", icon="🐬💪"),
     "gpt": OpenAI(),
-    "dummy": Dummy(),
     "anthropic": Anthropic(),
 }
 

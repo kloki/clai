@@ -23,6 +23,7 @@ language_assistant("rust", "🦀")
 language_assistant("python3", "🐍")
 language_assistant("go", "🐹 ")
 language_assistant("solidity", "♦️ ")
+language_assistant("javascript", "🚀")
 
 ASSISTANTS["bash"] = Assistant(
     "🖥️ ",
