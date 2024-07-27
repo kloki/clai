@@ -22,7 +22,7 @@ def get_model(lm):
     "-l",
     "--llm",
     type=click.Choice(list(LLM.keys())),
-    default="dolphin",
+    default="gpt",
 )
 @click.option(
     "-a", "--assistant", type=click.Choice(list(ASSISTANTS.keys())), default="default"
