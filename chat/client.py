@@ -53,9 +53,9 @@ class ChatBox(Widget):
         self.mount(ChatItem(self.md(content)))
         self.scroll_end()
 
-    def update_answer(self, content):
-        answer = self.query(ChatItem).last()
-        answer.update(self.md(content))
+    def update_current(self, content):
+        current = self.query(ChatItem).last()
+        current.update(self.md(content))
         self.scroll_end()
 
     def reset(self):
@@ -143,12 +143,35 @@ class Client(App):
     @work(exclusive=True)
     async def fetch_answer(self) -> None:
         chatbox = self.query_one(ChatBox)
-
         result = ""
+        current = ""
+        is_code_block = False
+        reset = False
         async for chunk in self.model.query(self.session):
+            current += chunk
             result += chunk
-            chatbox.update_answer(result)
+            if reset:
+                reset = False
+                if is_code_block:
+                    chatbox.create_filebox(current)
+                else:
+                    chatbox.create_answer(self.assistant.icon, current)
+            if is_code_block and "```" in current[3:]:
+                index = current.rfind("```") + 3
+                chatbox.update_current(current[:index])
+                current = current[index:]
+                is_code_block = False
+                reset = True
+            elif not is_code_block and "```" in current:
+                index = current.find("```")
+                chatbox.update_current(current[:index])
+                current = current[index:]
+                is_code_block = True
+                reset = True
+            else:
+                chatbox.update_current(current)
         self.session.answer(result)
+
         input = self.query_one(Input)
         input.disabled = False
         input.placeholder = "Ask a question."

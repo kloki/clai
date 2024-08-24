@@ -4,6 +4,8 @@ from anthropic import AsyncAnthropic as AnthropicClient
 from ollama import AsyncClient as OllamaClient
 from openai import AsyncOpenAI as OpenAIClient
 
+from .dummy_answers import PAYLOAD
+
 
 class OpenAI:
     def __init__(self, name="gpt-4o-mini", temperature=1, top_p=1):
@@ -70,17 +72,18 @@ class Dummy:
         self.icon = "🗑️"
 
     async def query(self, session):
-        for i in ["1", "...", "2", "...", "Done"]:
-            await asyncio.sleep(0.0)
+        for i in PAYLOAD:
+            await asyncio.sleep(0.2)
             yield i
 
 
 LLM = {
-    "dolphin": Ollama("dolphin-llama3", icon="🐬"),
-    "tinydolphin": Ollama("tinydolphin", icon="🐬🤏"),
-    "bigdolphin": Ollama("dolphin-mistral:7b-v2.8-fp16", icon="🐬💪"),
+    # "dolphin": Ollama("dolphin-llama3", icon="🐬"),
+    # "tinydolphin": Ollama("tinydolphin", icon="🐬🤏"),
+    # "bigdolphin": Ollama("dolphin-mistral:7b-v2.8-fp16", icon="🐬💪"),
     "gpt": OpenAI(),
     "anthropic": Anthropic(),
+    # "dummy": Dummy(),
 }
 
 LLM_ORDER = list(LLM.values())

@@ -3,7 +3,6 @@
 import os
 
 import click
-
 from chat import Client
 from chat.assistant import ASSISTANTS
 from chat.language_model import LLM
