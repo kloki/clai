@@ -4,14 +4,14 @@ from rich.markdown import Markdown
 from textual import on, work
 from textual.app import App, Widget
 from textual.events import Click
-from textual.widgets import Input, Label
+from textual.widgets import Input, Static
 
 from .assistant import ASSISTANTS
 from .language_model import Ollama, get_next_llm
 from .session import Session
 
 
-class ChatItem(Label):
+class ChatItem(Static):
     @on(Click)
     async def on_click(self, event: Click) -> None:
         contents = self.renderable.markup
@@ -26,31 +26,31 @@ class ChatItem(Label):
         self.styles.animate("opacity", 1.0, duration=0.1, delay=0.1)
 
 
-class UserLabel(Label):
+class UserStatic(Static):
     pass
 
 
 class ChatBox(Widget):
     def on_mount(self):
-        self.mount(Label())
+        self.mount(Static())
 
     @staticmethod
     def md(content):
         return Markdown(content, code_theme="dracula")
 
     def add_question(self, question):
-        self.mount(Label("You", classes="chatlabel user"))
+        self.mount(Static("You", classes="chatlabel user"))
         self.mount(ChatItem(self.md(question)))
         self.scroll_end()
 
     def create_answer(self, name, content):
-        self.mount(Label(name, classes="chatlabel llm"))
+        self.mount(Static(name, classes="chatlabel llm"))
         self.mount(ChatItem(self.md(content)))
         self.scroll_end()
 
     def create_filebox(self, content):
-        self.mount(Label("<>", classes="chatlabel filebox"))
-        self.mount(ChatItem(self.md(content)))
+        # self.mount(Static("<>", classes="chatlabel filebox"))
+        self.mount(ChatItem(self.md(content), classes="filebox"))
         self.scroll_end()
 
     def update_current(self, content):
@@ -60,10 +60,10 @@ class ChatBox(Widget):
 
     def reset(self):
         self.remove_children()
-        self.mount(Label())
+        self.mount(Static())
 
 
-class StatusBar(Label):
+class StatusBar(Static):
     pass
 
 
@@ -87,7 +87,7 @@ class Client(App):
     def compose(self):
         yield ChatBox()
         yield Input(type="text", placeholder="Ask a question.")
-        yield Label(self.status_bar_content(), classes="statusbar")
+        yield Static(self.status_bar_content(), classes="statusbar")
 
     def status_bar_content(self):
         return f"{self.assistant.banner()} - {self.model.icon}  {self.model.name}"
