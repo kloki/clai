@@ -4,11 +4,11 @@
 
 I minimalist terminal chat client for llm that works for me.
 
-# Featurs
+# Features
 
 - Streaming responses.
 - Renders Markdown.
-- Supports: OpenAI and Ollama.
+- Supports: OpenAI, Anthropic and Ollama.
 - Supports assistant profiles.
 
 # Run
