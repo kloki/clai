@@ -14,6 +14,6 @@ I minimalist terminal chat client for llm that works for me.
 # Run
 
 ```
-poetry install
+uv sync
 ./clai.py --help
 ```
