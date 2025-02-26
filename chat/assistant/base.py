@@ -10,7 +10,7 @@ class Assistant:
         self.help = help
 
     def instructions(self):
-        return [{"role": "system", "content": self.context}]
+        return [{"role": "user", "content": self.context}]
 
     def banner(self):
         return f"{self.icon} {self.help}"

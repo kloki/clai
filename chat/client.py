@@ -7,7 +7,7 @@ from textual.events import Click
 from textual.widgets import Input, Static
 
 from .assistant import ASSISTANTS
-from .language_model import Ollama, get_next_llm
+from .language_model import get_next_llm
 from .session import Session
 
 
@@ -49,7 +49,6 @@ class ChatBox(Widget):
         self.scroll_end()
 
     def create_filebox(self, content):
-        # self.mount(Static("<>", classes="chatlabel filebox"))
         self.mount(ChatItem(self.md(content), classes="filebox"))
         self.scroll_end()
 
@@ -77,7 +76,7 @@ class Client(App):
         ("ctrl+t", "toggle_llm()", "Toggle llm"),
     ]
 
-    def __init__(self, model=Ollama(), assistant=None):
+    def __init__(self, model, assistant=None):
         super().__init__()
         self.assistant = assistant if assistant else ASSISTANTS["default"]
         self.session = Session(self.assistant)

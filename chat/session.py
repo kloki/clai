@@ -17,9 +17,6 @@ class Session:
     def payload(self):
         return self.base + self.messages
 
-    def payload_anthropic(self):
-        return self.base[0]["content"], self.messages
-
     def reset(self):
         self.messages = []
 
