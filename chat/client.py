@@ -3,6 +3,7 @@ from pygments.lexers import guess_lexer
 from rich.markdown import Markdown
 from textual import on, work
 from textual.app import App, Widget
+from textual.binding import Binding
 from textual.events import Click
 from textual.widgets import Input, Static
 
@@ -69,11 +70,11 @@ class StatusBar(Static):
 class Client(App):
     CSS_PATH = "style.css"
     BINDINGS = [
-        ("ctrl+x", "quit", "Quit"),
-        ("ctrl+c", "clear_session()", "Clear"),
-        ("ctrl+v", "add_context()", "Context"),
-        ("ctrl+j", "dump_session()", "Dump"),
-        ("ctrl+t", "toggle_llm()", "Toggle llm"),
+        Binding("ctrl+x", "quit", "Quit", priority=True),
+        Binding("ctrl+c", "clear_session()", "Clear", priority=True),
+        Binding("ctrl+v", "add_context()", "Context", priority=True),
+        Binding("ctrl+j", "dump_session()", "Dump", priority=True),
+        Binding("ctrl+t", "toggle_llm()", "Toggle llm", priority=True),
     ]
 
     def __init__(self, model, assistant=None):
