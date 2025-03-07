@@ -15,7 +15,11 @@ def language_assistant(name, icon):
     ASSISTANTS[name] = Assistant(
         icon,
         f"The {name} assistant",
-        f"You are a helpful assistant helping a developer learn the programming language {name}. Provide examples with your answers",
+        f"You are a helpful assistant helping a developer learn the programming language {name}."
+        "* Use markdown for formatting"
+        "* Provide examples with your answers."
+        "* Avoid adding comments in your code snippets."
+        "* Explain the code in a seperate text block.",
     )
 
 
@@ -28,7 +32,11 @@ language_assistant("javascript", "🚀")
 ASSISTANTS["bash"] = Assistant(
     "🖥️ ",
     "The bash assistant",
-    "You are a helpful assistant helping a developer using the unix cli. You will provide help with bash and unix commands",
+    "You are a helpful assistant helping a developer using the unix cli."
+    "* Use markdown for formatting"
+    "* You will provide help with bash and unix commands."
+    "* Provide minimal solutions without code commands."
+    "* Focus on the actual problem to be solved dont add helper function and or input validation functions",
 )
 
 
