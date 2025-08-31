@@ -3,9 +3,9 @@
 import os
 
 import click
-from chat import Client
-from chat.assistant import ASSISTANTS
-from chat.language_model import LLM
+from .client import Client
+from .assistant import ASSISTANTS
+from .language_model import LLM
 
 
 def get_model(lm):
@@ -26,7 +26,7 @@ def get_model(lm):
 @click.option(
     "-a", "--assistant", type=click.Choice(list(ASSISTANTS.keys())), default="default"
 )
-def app(
+def main(
     llm,
     assistant,
 ):
@@ -37,4 +37,4 @@ def app(
 
 
 if __name__ == "__main__":
-    app()
+    main()
