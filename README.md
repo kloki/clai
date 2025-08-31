@@ -11,9 +11,9 @@ I minimalist terminal chat client for llm that works for me.
 - Supports: OpenAI, Anthropic and Ollama.
 - Supports assistant profiles.
 
-# Run
+# Install and run
 
 ```
-uv sync
-./clai.py --help
+uv tool install git+https://github.com/kloki/clai
+ai
 ```
