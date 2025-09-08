@@ -15,7 +15,7 @@ from .session import Session
 class ChatItem(Static):
     @on(Click)
     async def on_click(self, event: Click) -> None:
-        contents = self.renderable.markup
+        contents = self.content.markup
 
         # We quess the item only contains a code block. If so strip the
         # Markdown annotation

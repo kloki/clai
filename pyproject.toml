@@ -10,8 +10,8 @@ dependencies = [
   "pygments>=2.19.1",
   "pyperclip>=1.9.0",
   "requests>=2.32.3",
-  "rich>=13.9.4",
-  "textual>=2.1.2",
+  "rich>=14.1.0",
+  "textual>=6.1.0",
 ]
 
 [dependency-groups]
