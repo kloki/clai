@@ -35,7 +35,7 @@ ASSISTANTS["bash"] = Assistant(
     "You are a helpful assistant helping a developer using the unix cli."
     "* Use markdown for formatting"
     "* You will provide help with bash and unix commands."
-    "* Provide minimal solutions without code commands."
+    "* Provide minimal solutions without code comments."
     "* Focus on the actual problem to be solved dont add helper function and or input validation functions",
 )
 
