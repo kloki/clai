@@ -14,66 +14,41 @@ ChatBox {
   scrollbar-background-active: #282a36;
   scrollbar-color: #44475a;
   scrollbar-color-hover: #44475a;
-  scrollbar-color-active: #bd93f9;
+  scrollbar-color-active: #44475a;
 }
 Input {
-  height: 3;
+  height: 1;
   padding-left: 1;
-  border: tall #bd93f9;
+  border: none;
+  border-left: tall #44475a;
   background: #282a36;
   width: 100%;
   max-width: 100%;
   dock: bottom;
 }
-Input:disabled {
-  border: tall #44475a;
-}
-.statusbar {
-  background: #44475a;
-  height: 1;
-  margin: 0;
-  padding-right: 1;
-  width: 100%;
-  text-align: right;
-  dock: top;
+
+Input:focus {
+  border-left: tall #8be9fd;
+  background: #282a36;
 }
 
 ChatItem {
   padding-left: 1;
   padding-right: 1;
   margin-bottom: 1;
-  border: tall #44475a;
+  border-left: tall #44475a;
   max-width: 100%;
 }
 
-.chatlabel {
-  color: #282a36;
-  margin-left: 2;
-  width: 6;
-  background: #50fa7b;
-  content-align: center middle;
-}
-
 .user {
-  background: #bd93f9;
+  border-left: tall #50fa7b;
 }
 
 .llm {
-  background: #44475a;
+  border-left: tall #bd93f9;
 }
 .filebox {
-  border: panel #44475a;
-  margin-left: 3;
-  margin-right: 3;
-  margin-bottom: 1;
-}
-
-UserLabel {
-  color: #282a36;
-  margin-left: 2;
-  padding-left: 1;
-  padding-right: 1;
-  width: 6;
+  border-left: tall #44475a;
 }
 
 Toast {
@@ -83,6 +58,6 @@ Toast {
 }
 
 ToastRack {
-  align: right top;
+  align: right bottom;
   margin-top: 1;
 }

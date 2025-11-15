@@ -8,7 +8,6 @@ from textual.events import Click
 from textual.widgets import Input, Static
 
 from .assistant import ASSISTANTS
-from .language_model import get_next_llm
 from .session import Session
 
 
@@ -27,10 +26,6 @@ class ChatItem(Static):
         self.styles.animate("opacity", 1.0, duration=0.1, delay=0.1)
 
 
-class UserStatic(Static):
-    pass
-
-
 class ChatBox(Widget):
     def on_mount(self):
         self.mount(Static())
@@ -40,13 +35,11 @@ class ChatBox(Widget):
         return Markdown(content, code_theme="dracula")
 
     def add_question(self, question):
-        self.mount(Static("You", classes="chatlabel user"))
-        self.mount(ChatItem(self.md(question)))
+        self.mount(ChatItem(self.md(question), classes="user"))
         self.scroll_end()
 
     def create_answer(self, name, content):
-        self.mount(Static(name, classes="chatlabel llm"))
-        self.mount(ChatItem(self.md(content)))
+        self.mount(ChatItem(self.md(content), classes="llm"))
         self.scroll_end()
 
     def create_filebox(self, content):
@@ -74,7 +67,6 @@ class Client(App):
         Binding("ctrl+c", "clear_session()", "Clear", priority=True),
         Binding("ctrl+v", "add_context()", "Context", priority=True),
         Binding("ctrl+j", "dump_session()", "Dump", priority=True),
-        Binding("ctrl+t", "toggle_llm()", "Toggle llm", priority=True),
     ]
 
     def __init__(self, model, assistant=None):
@@ -87,7 +79,6 @@ class Client(App):
     def compose(self):
         yield ChatBox()
         yield Input(type="text", placeholder="Ask a question.")
-        yield Static(self.status_bar_content(), classes="statusbar")
 
     def status_bar_content(self):
         return f"{self.assistant.banner()} - {self.model.icon}  {self.model.name}"
@@ -109,11 +100,6 @@ class Client(App):
         chatbox = self.query_one(ChatBox)
         chatbox.create_filebox(paste)
         self.context = f"{self.context}\n{paste}"
-
-    def action_toggle_llm(self):
-        self.model = get_next_llm(self.model)
-        self.query_one(".statusbar").update(self.status_bar_content())
-        self.notify(f"󰀙 Toggled to {self.model.icon} {self.model.name}")
 
     @on(Input.Submitted)
     def proces_question(self):
