@@ -21,7 +21,7 @@ def get_model(lm):
     "-l",
     "--llm",
     type=click.Choice(list(LLM.keys())),
-    default="gpt",
+    default="base",
 )
 @click.option(
     "-a", "--assistant", type=click.Choice(list(ASSISTANTS.keys())), default="default"

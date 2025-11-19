@@ -6,7 +6,7 @@ from .dummy_answers import PAYLOAD
 
 
 class OpenAI:
-    def __init__(self, name="gpt-4o-mini", icons="🧠", temperature=1, top_p=1):
+    def __init__(self, name="gpt-5-nano", icons="🧠", temperature=1, top_p=1):
         self.temperature = temperature
         self.top_p = top_p
         self.client = OpenAIClient()
@@ -42,9 +42,10 @@ class Dummy:
 
 
 LLM = {
-    "gpt": OpenAI(),
-    "o1": OpenAI("o1-mini", icons="🧬"),
-    # "dummy": Dummy(),
+    "base": OpenAI("gpt-5.1"),
+    "nano": OpenAI("gpt-5-nano"),
+    "mini": OpenAI("gpt-5-mini"),
+    "dummy": Dummy(),
 }
 
 LLM_ORDER = list(LLM.values())
